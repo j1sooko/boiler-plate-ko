@@ -4,7 +4,9 @@ const port = 5000; // 3000 4000 5000 모두 ok
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const { User } = require("./models/User");
+const { auth } = require("./middleware/auth");
 const config = require("./config/key");
+
 
 // application/x-www-form-urlencoded 로 된 데이터를 분석해서 가져올 수 있게 해줌
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -24,7 +26,7 @@ mongoose
 app.get("/", (req, res) => res.send("Hello World! 우와~ 222")); // 루트 dir에 hello world 출력
 
 // register route
-app.post("/register", async (req, res) => {
+app.post("/api/users/register", async (req, res) => {
   // 회원가입시 필요한 정보들을 client에서 가져오면
   // 그것들을 데이터베이스에 넣어준다
   const user = new User(req.body);
@@ -47,7 +49,7 @@ app.post("/register", async (req, res) => {
   }); // mongodb 메소드 -> callback 메소드 지원 안함*/
 });
 
-app.post("/login", (req, res) => {
+app.post("/api/user/slogin", (req, res) => {
   //요청된 이메일이 데이터베이스에 있는지 찾음
   /* User.findOne({ email: req.body.email }, (err, user) => {
     if (!user) {
@@ -84,6 +86,24 @@ app.post("/login", (req, res) => {
       return res.status(400).send(err);
     });
 });
+
+// cf. role 1 어드민     role 2 특정 부서 어드민
+// role 0 일반 유저
+app.get('/api/users/auth', auth, (req, res) => { //auth: middle ware
+  // 여기까지 미들웨어를 통과해왔다는 건 Authentication이 true
+  req.status(200).json({
+    _id: req.user._id,
+    isAdmin: req.user.role === 0 ? false : true,
+    isAuth: true,
+    email: req.user.email,
+    name: req.user.name,
+    lastName: req.user.lastName,
+    role: req.user.role,
+    image: req.user.image
+  })
+})
+
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
