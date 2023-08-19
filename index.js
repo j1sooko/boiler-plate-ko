@@ -7,7 +7,6 @@ const { User } = require("./models/User");
 const { auth } = require("./middleware/auth");
 const config = require("./config/key");
 
-
 // application/x-www-form-urlencoded 로 된 데이터를 분석해서 가져올 수 있게 해줌
 app.use(bodyParser.urlencoded({ extended: true }));
 // application/json json으로 된 걸 분석해서 가져올 수 있게 해줌
@@ -49,7 +48,7 @@ app.post("/api/users/register", async (req, res) => {
   }); // mongodb 메소드 -> callback 메소드 지원 안함*/
 });
 
-app.post("/api/user/slogin", (req, res) => {
+app.post("/api/users/login", (req, res) => {
   //요청된 이메일이 데이터베이스에 있는지 찾음
   /* User.findOne({ email: req.body.email }, (err, user) => {
     if (!user) {
@@ -60,7 +59,7 @@ app.post("/api/user/slogin", (req, res) => {
     }
   }); */ // mongoose 5.0 -> callback 메소드 지원 안함*/
   User.findOne({ email: req.body.email })
-    .then(user => {
+    .then((user) => {
       if (!user) {
         return res.json({
           loginSuccess: false,
@@ -70,17 +69,21 @@ app.post("/api/user/slogin", (req, res) => {
       //데이터베이스에서 요청한 이메일이 있다면 비밀번호가 같은지 확인
       user.comparePassword(req.body.password, (err, isMatch) => {
         if (!isMatch)
-          return res.json({loginSuccess: false, message: "비밀번호가 틀렸습니다."});
+          return res.json({
+            loginSuccess: false,
+            message: "비밀번호가 틀렸습니다.",
+          });
 
         //비밀번호까지 맞다면 토큰을 생성하기
         user.generateToken((err, user) => {
           if (err) return res.status(400).send(err);
           //토큰을 쿠키, 로컬 스토리지 등에 저장
-          res.cookie("x_auth", user.token)
+          res
+            .cookie("x_auth", user.token)
             .status(200)
-            .json({loginSuccess: true, userId: user._id})
-        })
-      })
+            .json({ loginSuccess: true, userId: user._id });
+        });
+      });
     })
     .catch((err) => {
       return res.status(400).send(err);
@@ -89,7 +92,8 @@ app.post("/api/user/slogin", (req, res) => {
 
 // cf. role 1 어드민     role 2 특정 부서 어드민
 // role 0 일반 유저
-app.get('/api/users/auth', auth, (req, res) => { //auth: middle ware
+app.get("/api/users/auth", auth, (req, res) => {
+  //auth: middle ware
   // 여기까지 미들웨어를 통과해왔다는 건 Authentication이 true
   req.status(200).json({
     _id: req.user._id,
@@ -99,11 +103,33 @@ app.get('/api/users/auth', auth, (req, res) => { //auth: middle ware
     name: req.user.name,
     lastName: req.user.lastName,
     role: req.user.role,
-    image: req.user.image
-  })
+    image: req.user.image,
+  });
+});
+
+app.get("/api/users/logout", auth, (req, res) => {
+  User.findOneAndUpdate(
+    { _id: req.user._id }, //auth middle ware에서
+    { token: "" }) //token 삭제
+    .then((user) => {
+      res.status(200).send({
+        success: true,
+      });
+    })
+    .catch((err) => {
+       return res.json({ success: false, err })
+    }
+  )
+  /* User.findOneAndUpdate(
+    { _id: req.user._id }, //auth middle ware에서
+    { token: "" }, //token 삭제
+    (err, user) => {
+      if (err) return res.json({ success: false, err });
+      return res.status(200).send({
+        success: true,
+      });
+    }*/
 })
-
-
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
