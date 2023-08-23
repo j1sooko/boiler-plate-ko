@@ -24,6 +24,10 @@ mongoose
 
 app.get("/", (req, res) => res.send("Hello World! 우와~ 222")); // 루트 dir에 hello world 출력
 
+app.get("/api/hello", (req, res) => {
+  res.send("Hello World!");
+})
+
 // register route
 app.post("/api/users/register", async (req, res) => {
   // 회원가입시 필요한 정보들을 client에서 가져오면
