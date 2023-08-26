@@ -8,7 +8,12 @@ function LandingPage() {
       .then((response) => console.log(response)); // server에서 돌아오는 response를 console 창에 보여줌
   }, []);
   return (
-    <div>LandingPage</div>
+    <div style={{
+      display: 'flex', justifyContent: 'center', alignItems: 'center'
+      , width: '100%', height: '100%'
+    }}>
+      <h2>시작 페이지</h2>
+    </div>
   )
 }
 
