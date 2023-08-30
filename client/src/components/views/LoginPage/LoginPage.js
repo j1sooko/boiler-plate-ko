@@ -31,11 +31,10 @@ function LoginPage(props) {
       password: Password,
     };
 
-    dispatch(loginUser(body)) // redux 사용
+    dispatch(loginUser(body)) // redux 사용, user_action.js
       .then((response) => {
         if (response.payload.loginSuccess) {
           props.history.push('/')
-          // navigate('/')
         } else {
           alert("Error");
         }
