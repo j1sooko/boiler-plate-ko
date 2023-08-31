@@ -9,6 +9,7 @@ import { applyMiddleware, createStore } from 'redux';
 import promiseMiddleware from 'redux-promise';
 import reduxThunk from 'redux-thunk';
 import Reducer from './_reducers';
+import { BrowserRouter } from "react-router-dom";
 
 const createStoreWithMiddleware = applyMiddleware(
   promiseMiddleware,
@@ -17,14 +18,19 @@ const createStoreWithMiddleware = applyMiddleware(
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <Provider store={createStoreWithMiddleware(Reducer,
-      window.__REDUX_DEVTOOLS_EXTENSION__ &&
-      window.__REDUX_DEVTOOLS_EXTENSION__()
-    )}>
-      <App />
-    </Provider>
-  </React.StrictMode>
+  <BrowserRouter>
+    <React.StrictMode>
+      <Provider
+        store={createStoreWithMiddleware(
+          Reducer,
+          window.__REDUX_DEVTOOLS_EXTENSION__ &&
+            window.__REDUX_DEVTOOLS_EXTENSION__()
+        )}
+      >
+        <App />
+      </Provider>
+    </React.StrictMode>
+  </BrowserRouter>
 );
 
 // If you want to start measuring performance in your app, pass a function

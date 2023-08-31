@@ -43,10 +43,10 @@ function RegisterPage(props) {
 
     dispatch(registerUser(body)) // redux 사용
       .then((response) => {
-        if (response.payload.success) {
+            if (response.payload.success) {
           props.history.push("/login");
         } else {
-          alert("Error");
+          alert("로그아웃에 실패했습니다.");
         }
       });
   };
